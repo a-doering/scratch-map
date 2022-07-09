@@ -14,31 +14,48 @@ source = alt.topo_feature(data.world_110m.url, "countries")
 highlight = alt.selection_single(on="mouseover", fields=["id"], empty="none")
 
 # Layering and configuring the components
-layers = alt.layer(
-    alt.Chart(sphere).mark_geoshape(fill="lightblue"),
-    alt.Chart(graticule).mark_geoshape(stroke="white", strokeWidth=0.5),
-    alt.Chart(source)
-    .mark_geoshape(
-        fill="ForestGreen",
-        # TODO: change color on mouseover
-        # color=alt.condition(highlight, alt.value("red"), alt.value("beige")),
-        stroke="black",
-        strokeWidth=0.15,
+background = (
+    alt.layer(
+        alt.Chart(sphere).mark_geoshape(fill="lightblue"),
+        alt.Chart(graticule).mark_geoshape(stroke="white", strokeWidth=0.5),
+        alt.Chart(source)
+        .mark_geoshape(
+            fill="white",
+            stroke="black",
+            strokeWidth=0.15,
+        )
+        .encode(
+            tooltip=[
+                alt.Tooltip("id:N", title="Country"),
+            ],
+        )
+        # TODO: transform country ISO id to name
+        # .transform_lookup(
+        #     lookup="id",
+        #     from_=alt.LookupData(source, "geometries/id", ["my_id"]),
+        # )
     )
-    .encode(
-        tooltip=[
-            alt.Tooltip("id:N", title="Country"),
-        ]
-    )
-    .add_selection(highlight)
-    # TODO: transform country ISO id to name
-    # .transform_lookup(
-    #     lookup="id",
-    #     from_=alt.LookupData(source, "geometries/id", ["my_id"]),
-    # )
-).project("naturalEarth1").properties(
-    width=1200,
-    height=800
+    .project("naturalEarth1")
+    .properties(width=1200, height=800)
+    .interactive()
 )
 
-st.altair_chart(layers.interactive(), use_container_width=False)
+
+# TODO: change color on mouseover
+# color=alt.condition(highlight, alt.value("red"), alt.value("beige")),
+# .add_selection(highlight)
+
+foreground = (
+    alt.Chart(source)
+    .mark_geoshape()
+    .encode(color=alt.condition(highlight, "id", alt.value("white")))
+    .add_selection(highlight)
+    .interactive()
+)
+
+
+st.altair_chart(
+    background,
+    # (background + foreground),
+    use_container_width=False,
+)
