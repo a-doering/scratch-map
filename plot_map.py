@@ -36,6 +36,9 @@ layers = alt.layer(
     #     lookup="id",
     #     from_=alt.LookupData(source, "geometries/id", ["my_id"]),
     # )
-).project("naturalEarth1")
+).project("naturalEarth1").properties(
+    width=1200,
+    height=800
+)
 
 st.altair_chart(layers.interactive(), use_container_width=False)
