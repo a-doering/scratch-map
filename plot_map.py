@@ -11,7 +11,7 @@ graticule = alt.graticule()
 # Source of land data
 source = alt.topo_feature(data.world_110m.url, "countries")
 
-highlight = alt.selection_single(on="mouseover", fields=["id"], empty="none")
+hover = alt.selection_single(on="mouseover", empty="none")
 
 # Layering and configuring the components
 background = (
@@ -20,7 +20,7 @@ background = (
         alt.Chart(graticule).mark_geoshape(stroke="white", strokeWidth=0.5),
         alt.Chart(source)
         .mark_geoshape(
-            fill="white",
+            # fill="white",
             stroke="black",
             strokeWidth=0.15,
         )
@@ -28,6 +28,7 @@ background = (
             tooltip=[
                 alt.Tooltip("id:N", title="Country"),
             ],
+            color=alt.condition(hover, alt.value("firebrick"), alt.value("white")),
         )
         # TODO: transform country ISO id to name
         # .transform_lookup(
@@ -35,27 +36,23 @@ background = (
         #     from_=alt.LookupData(source, "geometries/id", ["my_id"]),
         # )
     )
+    .add_selection(hover)
     .project("naturalEarth1")
     .properties(width=1200, height=800)
-    .interactive()
 )
 
-
-# TODO: change color on mouseover
-# color=alt.condition(highlight, alt.value("red"), alt.value("beige")),
-# .add_selection(highlight)
-
-foreground = (
-    alt.Chart(source)
-    .mark_geoshape()
-    .encode(color=alt.condition(highlight, "id", alt.value("white")))
-    .add_selection(highlight)
-    .interactive()
-)
+# foreground = (
+#     alt.Chart(source)
+#     .mark_geoshape()
+#     .encode(
+#         color=alt.condition(hover, alt.value("firebrick"), alt.value("white"))
+#     )
+#     .add_selection(hover)
+# )
 
 
 st.altair_chart(
-    background,
-    # (background + foreground),
+    background.interactive(),
+    # (background + foreground).interactive(),
     use_container_width=False,
 )
