@@ -18,7 +18,7 @@ source = alt.topo_feature(data.world_110m.url, "countries")
 iso_name_url = "https://raw.githubusercontent.com/stefangabos/world_countries/master/data/countries/en/world.csv"
 country_names = get_iso_names(iso_name_url)
 
-hover = alt.selection_single(on="mouseover", empty="none")
+click = alt.selection_multi(empty="none")
 
 # Layering and configuring the components
 background = (
@@ -34,26 +34,18 @@ background = (
             tooltip=[
                 alt.Tooltip("name:N", title="Country"),
             ],
-            color=alt.condition(hover, alt.value("firebrick"), alt.value("white")),
+            # color=alt.condition(hover, alt.value("firebrick"), "none"),
+            color=alt.condition(click, alt.value("firebrick"), alt.value("white")),
         )
         .transform_lookup(
             lookup="id",
             from_=alt.LookupData(country_names, "id", ["name"]),
         ),
     )
-    .add_selection(hover)
+    .add_selection(click)
     .project("naturalEarth1")
     .properties(width=1200, height=800)
 )
-
-# foreground = (
-#     alt.Chart(source)
-#     .mark_geoshape()
-#     .encode(
-#         color=alt.condition(hover, alt.value("firebrick"), alt.value("white"))
-#     )
-#     .add_selection(hover)
-# )
 
 
 st.altair_chart(
