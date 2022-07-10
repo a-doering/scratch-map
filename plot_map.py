@@ -4,14 +4,19 @@ import streamlit as st
 from vega_datasets import data
 
 
+@st.cache
+def get_iso_names(url: str) -> pd.DataFrame:
+    return pd.read_csv(url)
+
+
 # Data generators for the background
 sphere = alt.sphere()
 graticule = alt.graticule()
 
 # Source of land data
 source = alt.topo_feature(data.world_110m.url, "countries")
-country_info_url = "https://raw.githubusercontent.com/stefangabos/world_countries/master/data/countries/en/world.csv"
-country_info = pd.read_csv(country_info_url)
+iso_name_url = "https://raw.githubusercontent.com/stefangabos/world_countries/master/data/countries/en/world.csv"
+country_names = get_iso_names(iso_name_url)
 
 hover = alt.selection_single(on="mouseover", empty="none")
 
@@ -22,7 +27,6 @@ background = (
         alt.Chart(graticule).mark_geoshape(stroke="white", strokeWidth=0.5),
         alt.Chart(source)
         .mark_geoshape(
-            # fill="white",
             stroke="black",
             strokeWidth=0.15,
         )
@@ -34,7 +38,7 @@ background = (
         )
         .transform_lookup(
             lookup="id",
-            from_=alt.LookupData(country_info, "id", ["name"]),
+            from_=alt.LookupData(country_names, "id", ["name"]),
         ),
     )
     .add_selection(hover)
