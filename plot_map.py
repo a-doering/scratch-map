@@ -10,6 +10,8 @@ graticule = alt.graticule()
 
 # Source of land data
 source = alt.topo_feature(data.world_110m.url, "countries")
+country_info_url = "https://raw.githubusercontent.com/stefangabos/world_countries/master/data/countries/en/world.csv"
+country_info = pd.read_csv(country_info_url)
 
 hover = alt.selection_single(on="mouseover", empty="none")
 
@@ -26,15 +28,14 @@ background = (
         )
         .encode(
             tooltip=[
-                alt.Tooltip("id:N", title="Country"),
+                alt.Tooltip("name:N", title="Country"),
             ],
             color=alt.condition(hover, alt.value("firebrick"), alt.value("white")),
         )
-        # TODO: transform country ISO id to name
-        # .transform_lookup(
-        #     lookup="id",
-        #     from_=alt.LookupData(source, "geometries/id", ["my_id"]),
-        # )
+        .transform_lookup(
+            lookup="id",
+            from_=alt.LookupData(country_info, "id", ["name"]),
+        ),
     )
     .add_selection(hover)
     .project("naturalEarth1")
